@@ -7,8 +7,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import arcsine
 
-# Zad1 (z listy 3)
-
 
 # Funkcja podcałkowa
 def f(x: np.ndarray) -> np.ndarray:
@@ -25,7 +23,7 @@ def f(x: np.ndarray) -> np.ndarray:
 
 
 # Monte Carlo klasyczna
-def monte_carlo_basic(n: int) -> float:
+def monte_carlo_basic(n: int) -> np.ndarray:
     """
     Monte Carlo całkowanie bez "redukcji wariancji."
 
@@ -40,7 +38,7 @@ def monte_carlo_basic(n: int) -> float:
 
 
 # Metoda odbić lustrzanych
-def monte_carlo_antithetic(n: int) -> float:
+def monte_carlo_antithetic(n: int) -> np.ndarray:
     """
      Całkowanie Monte Carlo przy użyciu: antithetic variates method.
 
@@ -56,7 +54,7 @@ def monte_carlo_antithetic(n: int) -> float:
 
 
 # Metoda zmiennej kontrolnej (użyjemy funkcji liniowej jako zmiennej kontrolnej)
-def monte_carlo_control_variate(n: int) -> float:
+def monte_carlo_control_variate(n: int) -> np.ndarray:
     """
     Monte Carlo integration using control variates method.
 
@@ -132,7 +130,7 @@ plt.xlabel("Liczba prób")
 plt.ylabel("Błąd")
 plt.title("Analiza błędu względem ilości symulacji")
 plt.legend()
-plt.grid(True)
+plt.grid(linestyle="--")
 plt.show()
 
 # Wariancje dla każdej z metod
@@ -157,13 +155,52 @@ plt.xlabel("Liczba prób")
 plt.ylabel("Wariancja")
 plt.title("Analiza wariancji względem ilości symulacji")
 plt.legend()
-plt.grid(True)
+plt.grid(linestyle="--")
+plt.show()
+
+# Generowanie wyników dla histogramów
+sample_size = 1000
+basic_samples = [monte_carlo_basic(n) for _ in range(sample_size)]
+antithetic_samples = [monte_carlo_antithetic(n) for _ in range(sample_size)]
+control_variate_samples = [monte_carlo_control_variate(n) for _ in range(sample_size)]
+
+plt.hist(basic_samples, label="Monte Carlo", bins=50, alpha=0.3, density=True)
+plt.hist(
+    antithetic_samples, label="Antithetic Variance", bins=50, alpha=0.3, density=True
+)
+plt.hist(
+    control_variate_samples, label="Control Variance", bins=50, alpha=0.3, density=True
+)
+plt.legend(loc="best")
+plt.title("Histogram wyników symulacji każdej z metod")
+plt.axvline(
+    x=np.pi,
+    color="r",
+    linestyle="--",
+    linewidth=2,
+    label="Wartość teoretyczna liczby pi",
+)
+plt.grid(linestyle="--")
+plt.show()
+
+# Rysowanie boxplotów
+
+plt.boxplot(
+    [basic_samples, antithetic_samples, control_variate_samples],
+    labels=["Monte Carlo", "Antithetic", "Control Variate"],
+)
+plt.axhline(exact_value, color="r", linestyle="dashed", linewidth=1)
+plt.title("Boxploty dla różnych metod Monte Carlo")
+plt.xlabel("Metoda")
+plt.ylabel("Wynik")
+plt.grid(linestyle="--")
 plt.show()
 
 # Tabela wyników i błędów
 print(" ")
 print(
-    f"{'Liczba prób':<15} {'Wynik (Basic)':<15} {'Błąd (Basic)':<15} {'Wynik (Antithetic)':<20} {'Błąd (Antithetic)':<20} {'Wynik (Control Variate)':<25} {'Błąd (Control Variate)':<25}"
+    f"{'Liczba prób':<15} {'Wynik (Basic)':<15} {'Błąd (Basic)':<15} {'Wynik (Antithetic)':<20} "
+    f"{'Błąd (Antithetic)':<20} {'Wynik (Control Variate)':<25} {'Błąd (Control Variate)':<25}"
 )
 for (
     n,
@@ -183,7 +220,8 @@ for (
     control_variate_errors,
 ):
     print(
-        f"{n:<15} {basic_result:<15.10f} {basic_error:<15.10f} {antithetic_result:<20.10f} {antithetic_error:<20.10f} {control_variate_result:<25.10f} {control_variate_error:<25.10f}"
+        f"{n:<15} {basic_result:<15.10f} {basic_error:<15.10f} {antithetic_result:<20.10f}"
+        f" {antithetic_error:<20.10f} {control_variate_result:<25.10f} {control_variate_error:<25.10f}"
     )
 
 
@@ -210,6 +248,7 @@ def generate_wiener_process(n_steps: int) -> np.ndarray:
     dW = np.random.normal(0, np.sqrt(dt), n_steps)
     W = np.concatenate(([0], np.cumsum(dW)))
     return W
+
 
 # Listy wynikowe.
 T_plus = []
@@ -251,6 +290,7 @@ x = np.linspace(0, 1, 100)
 axs[0, 0].plot(x, arcsine.pdf(x), "r-", lw=2, label="Teoretyczny")
 axs[0, 0].set_title("Histogram T_+")
 axs[0, 0].legend()
+axs[0, 0].grid(linestyle="--")
 
 # Dystrybuanty dla T_+
 axs[0, 1].hist(
@@ -265,12 +305,14 @@ axs[0, 1].hist(
 axs[0, 1].plot(x, arcsine.cdf(x), "r-", lw=2, label="Teoretyczny")
 axs[0, 1].set_title("Dystrybuanta empiryczna T_+")
 axs[0, 1].legend()
+axs[0, 1].grid(linestyle="--")
 
 # Histogram dla L
 axs[1, 0].hist(L, bins=50, density=True, alpha=0.6, color="coral", label="Empiryczny")
 axs[1, 0].plot(x, arcsine.pdf(x), "r-", lw=2, label="Teoretyczny")
 axs[1, 0].set_title("Histogram L")
 axs[1, 0].legend()
+axs[1, 0].grid(linestyle="--")
 
 # Dystrybuanty dla L
 axs[1, 1].hist(
@@ -285,12 +327,14 @@ axs[1, 1].hist(
 axs[1, 1].plot(x, arcsine.cdf(x), "r-", lw=2, label="Teoretyczny")
 axs[1, 1].set_title("Dystrybuanta empiryczna L")
 axs[1, 1].legend()
+axs[1, 1].grid(linestyle="--")
 
 # Histogram dla M
 axs[2, 0].hist(M, bins=50, density=True, alpha=0.6, color="coral", label="Empiryczny")
 axs[2, 0].plot(x, arcsine.pdf(x), "r-", lw=2, label="Teoretyczny")
 axs[2, 0].set_title("Histogram M")
 axs[2, 0].legend()
+axs[2, 0].grid(linestyle="--")
 
 # Dystrybuanty dla M
 axs[2, 1].hist(
@@ -305,6 +349,7 @@ axs[2, 1].hist(
 axs[2, 1].plot(x, arcsine.cdf(x), "r-", lw=2, label="Teoretyczny")
 axs[2, 1].set_title("Dystrybuanta empiryczna M")
 axs[2, 1].legend()
+axs[2, 1].grid(linestyle="--")
 
 plt.tight_layout()
 plt.show()
